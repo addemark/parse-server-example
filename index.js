@@ -2,13 +2,14 @@
 // compatible API routes.
 
 const express = require('express');
-const ParseServer = require('parse-server').ParseServer;
+const { default: ParseServer, ParseGraphQLServer } = require('parse-server');
 const path = require('path');
 const args = process.argv || [];
 const test = args.some(arg => arg.includes('jasmine'));
+require('dotenv').config({ path: './env/.env' });
 
 const databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
-
+console.log('[***apID**]', process.env.APP_ID);
 if (!databaseUri) {
   console.log('DATABASE_URI not specified, falling back to localhost.');
 }
@@ -16,6 +17,7 @@ const config = {
   databaseURI: databaseUri || 'mongodb://localhost:27017/dev',
   cloud: process.env.CLOUD_CODE_MAIN || __dirname + '/cloud/main.js',
   appId: process.env.APP_ID || 'myAppId',
+  javascriptKey: process.env.JAVASCRIPT_KEY, //Add your javascript key here. Keep it secret!
   masterKey: process.env.MASTER_KEY || '', //Add your master key here. Keep it secret!
   serverURL: process.env.SERVER_URL || 'http://localhost:1337/parse', // Don't forget to change to https if needed
   liveQuery: {
@@ -35,7 +37,19 @@ app.use('/public', express.static(path.join(__dirname, '/public')));
 const mountPath = process.env.PARSE_MOUNT || '/parse';
 if (!test) {
   const api = new ParseServer(config);
-  app.use(mountPath, api);
+  // Create the GraphQL Server Instance
+  const parseGraphQLServer = new ParseGraphQLServer(api, {
+    graphQLPath: '/graphql',
+    playgroundPath: '/playground',
+  });
+  //app.use(mountPath, api);
+
+  // (Optional) Mounts the REST API
+  app.use(mountPath, api.app);
+  // Mounts the GraphQL API using graphQLPath: '/graphql'
+  parseGraphQLServer.applyGraphQL(app);
+  // (Optional) Mounts the GraphQL Playground - do NOT use in Production
+  parseGraphQLServer.applyPlayground(app);
 }
 
 // Parse Server plays nicely with the rest of your web routes
