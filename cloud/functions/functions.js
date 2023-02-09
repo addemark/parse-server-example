@@ -1,6 +1,7 @@
-Parse.Cloud.define('hello', req => {
+Parse.Cloud.define('hello', (req, response) => {
+  Parse.Cloud.useMasterKey();
   req.log.info(req);
-  return 'Hi';
+  return response.success('success');
 });
 
 Parse.Cloud.define('asyncFunction', async req => {
