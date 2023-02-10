@@ -43,7 +43,7 @@ if (!test) {
   // Create the GraphQL Server Instance
   const parseGraphQLServer = new ParseGraphQLServer(api, {
     graphQLPath: '/graphql',
-    playgroundPath: '/playground',
+    // playgroundPath: '/playground',
   });
   //app.use(mountPath, api);
 
