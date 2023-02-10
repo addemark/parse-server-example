@@ -6,7 +6,7 @@ const { default: ParseServer, ParseGraphQLServer } = require('parse-server');
 const path = require('path');
 const args = process.argv || [];
 const test = args.some(arg => arg.includes('jasmine'));
-require('dotenv').config({ path: './env/.env' });
+require('dotenv').config({ path: `./env/.env.${process.env.NODE_ENV}` });
 
 const databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 
